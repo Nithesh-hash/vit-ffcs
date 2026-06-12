@@ -46,16 +46,16 @@ main { flex: 1; display: grid; grid-template-columns: 370px 1fr; }
 .sidebar {
   background: #fff; border-right: 1.5px solid var(--border);
   display: flex; flex-direction: column;
-  height: calc(100vh - 60px); position: sticky; top: 60px; overflow: hidden;
+  height: calc(100vh - 60px); position: sticky; top: 60px;
 }
-.sidebar-tabs { display: flex; border-bottom: 1.5px solid var(--border); background: var(--surface2); }
+.sidebar-tabs { display: flex; border-bottom: 1.5px solid var(--border); background: var(--surface2); flex-shrink: 0; }
 .tab-btn {
   flex: 1; padding: 13px 6px; font-family: var(--font); font-size: 0.78rem; font-weight: 700;
   background: transparent; border: none; cursor: pointer; color: var(--text-muted);
   border-bottom: 2.5px solid transparent; transition: all .15s; letter-spacing: 0.02em;
 }
 .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: #fff; }
-.tab-content { display: none; flex: 1; overflow-y: auto; padding: 18px; flex-direction: column; gap: 12px; }
+.tab-content { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; padding: 18px; flex-direction: column; gap: 12px; min-height: 0; }
 .tab-content.active { display: flex; }
 
 .form-group { display: flex; flex-direction: column; gap: 5px; }
@@ -184,9 +184,9 @@ footer {
 .footer-text { font-size: 0.78rem; color: var(--text-muted); }
 .footer-text strong { color: var(--accent); }
 .linkedin-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 7px 16px; background: #0077b5; border-radius: 7px;
-  color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 700; transition: all .15s;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; background: #0077b5; border-radius: 7px;
+  color: #fff; text-decoration: none; transition: all .15s; flex-shrink: 0;
 }
 .linkedin-btn:hover { background: #005f91; transform: translateY(-1px); }
 .linkedin-btn svg { width: 15px; height: 15px; }
@@ -197,7 +197,7 @@ footer {
 .empty-state { text-align: center; padding: 28px 12px; color: var(--text-muted); font-size: 0.82rem; }
 
 /* PASTE PANEL */
-.paste-panel { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+.paste-panel { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; }
 .paste-panel-head {
   background: #fff; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center;
   border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
@@ -224,6 +224,9 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
 .parse-row .pr-venue { color: var(--text-muted); }
 .parse-row .pr-del { cursor: pointer; color: var(--accent3); font-weight: 700; padding: 0 4px; flex-shrink: 0; }
 
+
+
+
 </style>
 </head>
 <body>
@@ -231,8 +234,6 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
 <nav>
   <div class="logo"><span class="vit">VIT-</span><span class="connect">FFCS</span></div>
   <div class="nav-right">
-    <span class="nav-badge">FFCS Planner</span>
-    <span class="credit-badge" id="credit-display">Credits: 0 / 27</span>
     <button class="btn btn-success btn-nav" onclick="downloadTimetable()">Download Timetable</button>
     <button class="btn btn-danger btn-nav" onclick="eraseAll()">Erase All</button>
   </div>
@@ -299,24 +300,23 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
       </div>
       <button class="btn btn-primary btn-block" onclick="addFaculty()">Add Faculty</button>
 
-      <!-- PASTE PANEL -->
+      <!-- BULK PANEL -->
       <div class="paste-panel">
         <div class="paste-panel-head" onclick="togglePastePanel()">
-          <span class="paste-panel-title">Paste Multiple Faculty</span>
+          <span class="paste-panel-title">Add Multiple Faculty</span>
           <span id="paste-arrow" style="font-size:0.8rem;color:var(--accent)">&#9660;</span>
         </div>
         <div class="paste-panel-body hidden" id="paste-panel-body">
           <div class="form-group">
-            <label>Course (for pasted faculty)</label>
+            <label>Course (for all parsed faculty)</label>
             <select id="paste-course"><option value="">-- Select Course --</option></select>
           </div>
           <div class="form-group">
-            <label>Paste faculty text below</label>
-            <textarea class="paste-box" id="paste-box" placeholder="Paste any text containing faculty info. Each line or block with a name, slot (like A1+TA1 or L51+L52) and venue (like SJT109) will be parsed automatically.&#10;&#10;Example:&#10;SIVAKUMAR M  F1+TF1  SJT109&#10;JOTHISH KUMAR M  B1+TB1  SJT113&#10;THANDEESWARAN R (E)  A2+TA2  SJT112"></textarea>
+            <label>Paste faculty text — auto-parsed instantly</label>
+            <textarea class="paste-box" id="paste-box" placeholder="Paste faculty data from VTOP or anywhere.&#10;Each line should have: Name  Slot  Venue&#10;&#10;Example:&#10;SIVAKUMAR M  F1+TF1  SJT109&#10;JOTHISH KUMAR M  B1+TB1  SJT113&#10;THANDEESWARAN R (E)  A2+TA2  SJT112" oninput="parsePasteText()"></textarea>
           </div>
-          <button class="btn btn-outline btn-block" style="font-size:0.8rem" onclick="parsePasteText()">Parse Text</button>
           <div id="parse-preview" class="parse-preview"></div>
-          <button class="btn btn-success btn-block" id="paste-confirm-btn" style="display:none;font-size:0.82rem" onclick="confirmParsedFaculty()">Add All Parsed Faculty</button>
+          <button class="btn btn-success btn-block" id="paste-confirm-btn" style="font-size:0.82rem;opacity:0.4;cursor:not-allowed" disabled onclick="confirmParsedFaculty()">Add All to Faculty List</button>
         </div>
       </div>
 
@@ -344,9 +344,8 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
       <div class="section-header">
         <div class="section-title"><span class="s-bar"></span> Weekly Timetable</div>
         <div class="tt-toggle">
-          <button class="tog-btn"        id="tog-morning"   onclick="setView('morning')">Theory Hours</button>
-          <button class="tog-btn"        id="tog-afternoon" onclick="setView('afternoon')">Lab Hours</button>
-          <button class="tog-btn active" id="tog-full"      onclick="setView('full')">Both</button>
+          <button class="tog-btn active" id="tog-morning"   onclick="setView('morning')">Morning</button>
+          <button class="tog-btn"        id="tog-afternoon" onclick="setView('afternoon')">Afternoon</button>
         </div>
       </div>
       <div class="tt-card">
@@ -377,11 +376,10 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
 
 <footer>
   <div class="footer-text">Made for <strong>VITian</strong>s &mdash; VIT-FFCS Planner.</div>
-  <a class="linkedin-btn" href="https://www.linkedin.com/in/nithesh-kumar-t-b4028130a/" target="_blank" rel="noopener">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <a class="linkedin-btn" href="https://www.linkedin.com/in/nithesh-kumar-t-b4028130a/" target="_blank" rel="noopener" title="LinkedIn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;display:block">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.327-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
     </svg>
-    LinkedIn
   </a>
 </footer>
 
@@ -389,10 +387,24 @@ textarea.paste-box:focus { outline: none; border-color: var(--accent); box-shado
 // ====== SLOT DATA ======
 const DAYS = ['MON','TUE','WED','THU','FRI'];
 
-const TH_M = ['8:00 AM|to|8:50 AM','8:55 AM|to|9:45 AM','9:50 AM|to|10:40 AM','10:45 AM|to|11:35 AM','11:40 AM|to|12:30 PM','12:35 PM|to|1:25 PM'];
-const TH_A = ['2:00 PM|to|2:50 PM','2:55 PM|to|3:45 PM','3:50 PM|to|4:40 PM','4:45 PM|to|5:35 PM','5:40 PM|to|6:30 PM','6:35 PM|to|7:25 PM'];
-const LB_M = ['08:00 AM|to|08:50 AM','08:50 AM|to|09:40 AM','09:50 AM|to|10:40 AM','10:40 AM|to|11:30 AM','11:40 AM|to|12:30 PM','12:30 PM|to|1:20 PM'];
-const LB_A = ['2:00 PM|to|2:50 PM','2:50 PM|to|3:40 PM','3:50 PM|to|4:40 PM','4:40 PM|to|5:30 PM','5:40 PM|to|6:30 PM','6:30 PM|to|7:20 PM'];
+// MORNING: Theory 8:00AM–12:50PM (cols 0-5), Lab 2:00PM–7:20PM (cols 6-11)
+// AFTERNOON: Theory 2:00PM–7:50PM (cols 0-5 reused), Lab 8:00AM–1:20PM (cols 6-11 reused)
+
+// Morning Theory (col 0-5): 8:00–8:50, 9:00–9:50, 10:00–10:50, 11:00–11:50, 12:00–12:50, [col5 = S11/S15 special]
+const TH_MORNING = ['8:00 AM|to|8:50 AM','9:00 AM|to|9:50 AM','10:00 AM|to|10:50 AM','11:00 AM|to|11:50 AM','12:00 PM|to|12:50 PM','12:00 PM|to|12:50 PM'];
+// Morning Lab (col 6-11): 2:00–2:50, 2:51–3:40, 3:51–4:40, 4:41–5:30, 5:40–6:30, 6:31–7:20
+const LB_MORNING = ['2:00 PM|to|2:50 PM','2:51 PM|to|3:40 PM','3:51 PM|to|4:40 PM','4:41 PM|to|5:30 PM','5:40 PM|to|6:30 PM','6:31 PM|to|7:20 PM'];
+
+// Afternoon Theory (col 0-5): 2:00–2:50, 3:00–3:50, 4:00–4:50, 5:00–5:50, 6:00–6:50, 7:01–7:50
+const TH_AFTERNOON = ['2:00 PM|to|2:50 PM','3:00 PM|to|3:50 PM','4:00 PM|to|4:50 PM','5:00 PM|to|5:50 PM','6:00 PM|to|6:50 PM','7:01 PM|to|7:50 PM'];
+// Afternoon Lab (col 6-11): 8:00–8:50, 8:51–9:40, 9:51–10:40, 10:41–11:30, 11:40–12:30, 12:31–1:20
+const LB_AFTERNOON = ['8:00 AM|to|8:50 AM','8:51 AM|to|9:40 AM','9:51 AM|to|10:40 AM','10:41 AM|to|11:30 AM','11:40 AM|to|12:30 PM','12:31 PM|to|1:20 PM'];
+
+// Keep old arrays as aliases so download function still works
+const TH_M = TH_MORNING;
+const TH_A = TH_AFTERNOON;
+const LB_M = LB_MORNING;
+const LB_A = LB_AFTERNOON;
 
 // col 0-5 morning, 6-11 afternoon
 const TH_GRID = [
@@ -413,7 +425,7 @@ const LB_GRID = [
 const COLORS = ['#4f46e5','#059669','#d97706','#dc2626','#7c3aed','#0284c7','#be185d','#16a34a','#ea580c','#0891b2','#6d28d9','#b45309','#0369a1','#9333ea','#047857'];
 
 // ====== STATE ======
-let courses=[], faculties=[], selected=[], colorIdx=0, ttView='full';
+let courses=[], faculties=[], selected=[], colorIdx=0, ttView='morning';
 
 // ====== PERSIST ======
 function save() {
@@ -486,13 +498,14 @@ function syncFacSelect() {
   const opts='<option value="">-- Select Course --</option>'+courses.map(c=>`<option value="${c.id}">${c.code} - ${c.title}</option>`).join('');
   ['f-course','paste-course'].forEach(id=>{
     const el=document.getElementById(id);
+    if(!el) return;
     const prev=el.value;
     el.innerHTML=opts;
     if(prev) el.value=prev;
   });
 }
 
-// ====== PASTE FACULTY ======
+// ====== PASTE / BULK FACULTY ======
 let parsedRows=[];
 
 function togglePastePanel() {
@@ -500,97 +513,111 @@ function togglePastePanel() {
   const arrow=document.getElementById('paste-arrow');
   const hidden=body.classList.toggle('hidden');
   arrow.innerHTML=hidden?'&#9660;':'&#9650;';
-  if(!hidden) syncFacSelect();
+  if(!hidden){ syncFacSelect(); setParsedRows([]); }
+}
+
+function setParsedRows(rows) {
+  parsedRows=rows;
+  renderParsePreview();
+  const btn=document.getElementById('paste-confirm-btn');
+  if(parsedRows.length>0){
+    btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer';
+  } else {
+    btn.disabled=true; btn.style.opacity='0.4'; btn.style.cursor='not-allowed';
+  }
 }
 
 function parsePasteText() {
   const text=document.getElementById('paste-box').value;
-  if(!text.trim()){ alert2('Paste some text first.','error'); return; }
+  if(!text.trim()){ setParsedRows([]); return; }
+  const rows=extractFacultyFromText(text);
+  setParsedRows(rows);
+}
 
-  // Slot pattern: one or more slot tokens joined by +
-  // Slot token: letter(s) + digits (optionally with trailing letters like TA1, TG1, L51 etc)
-  const slotPattern = /\b([A-Z]{1,4}\d+(?:\+[A-Z]{1,4}\d+)+)\b/g;
-  // Venue pattern: letters+digits combination like SJT109, PRP449, MB101
-  const venuePattern = /\b([A-Z]{2,4}\d{2,4}[A-Z]?)\b/g;
+function extractFacultyFromText(text) {
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>2);
+  const result=[];
 
-  // Split into lines / blocks; try line by line first, then fall back to whole-text chunking
-  const lines = text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>2);
+  // Known slot pattern: optional T/TA/TB prefix + letter(s) + digit(s), optionally joined by +
+  // Handles: A1, B2, F1, G1, L51, TA1, TB1, TG1, A1+TA1, L51+L52, F1+TF1 etc.
+  const SLOT_RE = /\b((?:T[A-Z]{0,2})?\b[A-Z]{1,3}\d{1,2}(?:\+(?:T[A-Z]{0,2})?[A-Z]{1,3}\d{1,2})*)\b/g;
 
-  parsedRows=[];
+  // Venue pattern: 2-5 uppercase letters followed by 2-4 digits, optionally trailing letter+digit
+  // Handles: SJT109, PRP238, PRP238A, PRPG34, MB101, TT401 etc.
+  const VENUE_RE = /\b([A-Z]{2,5}\d{1,4}[A-Z]?\d?)\b/g;
 
   for(const line of lines) {
-    // Find slot
-    const slotMatch = [...line.matchAll(/\b([A-Z]{1,4}\d+(?:\+[A-Z]{1,4}\d+)+)\b/g)];
-    if(!slotMatch.length) continue;
-    const slot = slotMatch[0][1];
+    // Uppercase the line for matching, but keep original for name extraction
+    const upper = line.toUpperCase();
 
-    // Find venue: alphanumeric token that looks like a venue (2-4 letters + 2-4 digits)
-    const venueMatch = [...line.matchAll(/\b([A-Z]{2,4}\d{2,4}[A-Z]?\d?)\b/g)]
-      .filter(m=>m[1]!==slot && !m[1].match(/^\d/));
-    const venue = venueMatch.length ? venueMatch[venueMatch.length-1][1] : '';
+    // Find all slot candidates
+    const slotMatches = [...upper.matchAll(SLOT_RE)].map(m=>m[1]);
+    if(!slotMatches.length) continue;
 
-    // Name: remove slot, venue, and common noise tokens; what remains is the name
-    let nameStr = line;
-    // Remove the slot
-    nameStr = nameStr.replace(slot, '');
+    // Pick the slot: prefer compound slots (with +), else first single slot
+    const slot = slotMatches.find(s=>s.includes('+')) || slotMatches[0];
+
+    // Find venue: last token that looks like a venue and isn't the slot
+    const venueMatches = [...upper.matchAll(VENUE_RE)]
+      .map(m=>m[1])
+      .filter(v => v !== slot && !slotMatches.includes(v));
+    const venue = venueMatches.length ? venueMatches[venueMatches.length-1] : '';
+
+    // Extract name: remove slot, venue, leading serial numbers from original line
+    let name = line;
+    // Remove slot (case-insensitive)
+    name = name.replace(new RegExp(slot.replace(/\+/g,'\\+'),'i'), '');
     // Remove venue
-    if(venue) nameStr = nameStr.replace(new RegExp('\\b'+venue+'\\b'), '');
-    // Remove stray serial numbers at start (e.g. "1.", "2)", digits only)
-    nameStr = nameStr.replace(/^\s*\d+[\.\)]\s*/, '');
-    // Remove tabs and extra spaces
-    nameStr = nameStr.replace(/\s{2,}/g,' ').trim();
-    // Clean trailing/leading punctuation
-    nameStr = nameStr.replace(/^[\s\-\|,]+|[\s\-\|,]+$/g,'').trim();
+    if(venue) name = name.replace(new RegExp('\\b'+venue+'\\b','i'), '');
+    // Remove leading serial: "1." "2)" "3 " etc
+    name = name.replace(/^\s*\d+[\.\)\-\s]\s*/,'');
+    // Collapse spaces and trim punctuation
+    name = name.replace(/\s{2,}/g,' ').trim();
+    name = name.replace(/^[\s\-\|,;:]+|[\s\-\|,;:]+$/g,'').trim();
 
-    if(!nameStr || nameStr.length < 2) continue;
-
-    parsedRows.push({name:nameStr, slot, venue});
+    if(!name || name.length < 2) continue;
+    result.push({name, slot, venue});
   }
-
-  renderParsePreview();
+  return result;
 }
 
 function renderParsePreview() {
   const el=document.getElementById('parse-preview');
-  const btn=document.getElementById('paste-confirm-btn');
-  if(!parsedRows.length){
-    el.innerHTML='<div style="font-size:0.75rem;color:var(--accent3);padding:4px">No faculty found. Try formatting each faculty on its own line with: Name  Slot  Venue</div>';
-    btn.style.display='none'; return;
-  }
-  el.innerHTML=parsedRows.map((r,i)=>`
+  if(!parsedRows.length){ el.innerHTML=''; return; }
+  el.innerHTML=`<div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px">${parsedRows.length} faculty found — review and remove any incorrect rows before adding.</div>`+
+  parsedRows.map((r,i)=>`
     <div class="parse-row">
-      <span class="pr-name">${r.name}</span>
-      <span class="pr-slot">${r.slot}</span>
-      <span class="pr-venue">${r.venue||'?'}</span>
+      <div style="flex:1;min-width:0">
+        <div class="pr-name">${r.name}</div>
+        <div style="font-size:0.65rem;margin-top:1px"><span class="pr-slot">${r.slot}</span> &bull; <span class="pr-venue">${r.venue||'No venue'}</span></div>
+      </div>
       <span class="pr-del" onclick="removeParsedRow(${i})" title="Remove">X</span>
     </div>
   `).join('');
-  btn.style.display='flex';
 }
 
 function removeParsedRow(i) {
   parsedRows.splice(i,1);
-  renderParsePreview();
+  setParsedRows([...parsedRows]);
 }
 
 function confirmParsedFaculty() {
+  if(!parsedRows.length){ alert2('Nothing to add.','error'); return; }
   const courseId=parseInt(document.getElementById('paste-course').value);
-  if(!courseId){ alert2('Select a course for these faculty.','error'); return; }
-  let added=0, skipped=0;
-  for(const r of parsedRows) {
-    if(!r.name||!r.slot){ skipped++; continue; }
+  if(!courseId){ alert2('Select a course first.','error'); return; }
+  let added=0,skipped=0;
+  for(const r of parsedRows){
+    if(!r.name||!r.slot){skipped++;continue;}
     const slotParts=r.slot.split('+').map(s=>s.trim()).filter(Boolean);
-    const venue=r.venue||'TBA';
-    faculties.push({id:Date.now()+Math.random(), courseId, name:r.name, slot:r.slot, slotParts, venue});
+    faculties.push({id:Date.now()+Math.random()*1000, courseId, name:r.name, slot:r.slot, slotParts, venue:r.venue||'TBA'});
     added++;
   }
   save(); renderFaculty();
   document.getElementById('paste-box').value='';
-  document.getElementById('parse-preview').innerHTML='';
-  document.getElementById('paste-confirm-btn').style.display='none';
-  parsedRows=[];
+  setParsedRows([]);
   alert2(`Added ${added} faculty${skipped?' ('+skipped+' skipped)':''}.`,'success');
 }
+
 function addFaculty() {
   const courseId=parseInt(document.getElementById('f-course').value);
   const name  =document.getElementById('f-name').value.trim();   // case-sensitive
@@ -711,80 +738,93 @@ function renderSelected() {
 // ====== TIMETABLE ======
 function setView(v) {
   ttView=v;
-  ['morning','afternoon','full'].forEach(x=>document.getElementById('tog-'+x).classList.toggle('active',x===v));
+  ['morning','afternoon'].forEach(x=>document.getElementById('tog-'+x).classList.toggle('active',x===v));
   renderTT();
 }
 function selForSlot(s){ if(!s) return null; return selected.find(x=>x.slotParts.includes(s))||null; }
 
 function renderTT() {
-  // Always render BOTH header rows (Theory Hours + Lab Hours) stacked, exactly like the reference images.
-  // The toggle controls which *columns* are visible:
-  //   "Theory Hours" = show morning+afternoon theory times (cols 0-11, row 1 prominent)
-  //   "Lab Hours"    = show morning+afternoon lab times    (cols 0-11, row 2 prominent)
-  //   "Both"         = show both rows exactly as reference (DEFAULT recommended)
-  // Since the reference always shows both rows, we always render both.
   const tbl=document.getElementById('tt-tbl');
+  const isMorning = (ttView !== 'afternoon');
 
-  // ---- HEADER ROW 1: THEORY HOURS ----
-  let th1=`<tr>`;
-  th1+=`<th class="type-th" style="background:#5b72ee;color:#fff;vertical-align:middle">THEORY<br>HOURS</th>`;
-  // Morning theory cols 0-5
-  for(let c=0;c<6;c++){
-    const p=TH_M[c].split('|');
-    th1+=`<th class="time-th" style="background:#dce3fb;color:#3730a3">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
-  }
-  // Lunch (rowspan 2 to cover both header rows)
-  th1+=`<th class="lunch-th" rowspan="2" style="background:#c8cdd8;vertical-align:middle"><span class="lunch-lbl">L<br>U<br>N<br>C<br>H</span></th>`;
-  // Afternoon theory cols 6-11
-  for(let c=6;c<12;c++){
-    const p=TH_A[c-6].split('|');
-    th1+=`<th class="time-th" style="background:#e0e7ff;color:#3730a3">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
-  }
-  th1+=`</tr>`;
+  // MORNING: left 6 cols = Theory slots (TH_GRID 0-5) timed 8AM-12:50PM
+  //          right 6 cols = Lab slots (LB_GRID 6-11) timed 2PM-7:20PM
+  //
+  // AFTERNOON: left 6 cols = Lab slots (LB_GRID 0-5) timed 8AM-1:20PM
+  //            right 6 cols = Theory slots (TH_GRID 6-11) timed 2PM-7:50PM
+  //
+  // Single timing header row. Slot grid columns never change position.
 
-  // ---- HEADER ROW 2: LAB HOURS ----
-  let th2=`<tr>`;
-  th2+=`<th class="type-th" style="background:#5b9bd5;color:#fff;vertical-align:middle">LAB<br>HOURS</th>`;
-  // Morning lab cols 0-5
+  const leftTimes  = isMorning ? TH_MORNING   : LB_AFTERNOON;
+  const rightTimes = isMorning ? LB_MORNING    : TH_AFTERNOON;
+  const leftBg     = '#dce3fb';
+  const leftColor  = '#3730a3';
+  const rightBg    = '#dbeafe';
+  const rightColor = '#1d4ed8';
+
+  // ---- SINGLE HEADER ROW ----
+  let thead=`<tr>`;
+  thead+=`<th class="type-th" style="background:#5b72ee;color:#fff;vertical-align:middle">Timing</th>`;
   for(let c=0;c<6;c++){
-    const p=LB_M[c].split('|');
-    th2+=`<th class="time-th" style="background:#dbeafe;color:#1d4ed8">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
+    const p=leftTimes[c].split('|');
+    thead+=`<th class="time-th" style="background:${leftBg};color:${leftColor}">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
   }
-  // Afternoon lab cols 6-11
-  for(let c=6;c<12;c++){
-    const p=LB_A[c-6].split('|');
-    th2+=`<th class="time-th" style="background:#eff6ff;color:#1d4ed8">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
+  thead+=`<th class="lunch-th" style="background:#c8cdd8;vertical-align:middle"><span class="lunch-lbl">B<br>R<br>E<br>A<br>K</span></th>`;
+  for(let c=0;c<6;c++){
+    const p=rightTimes[c].split('|');
+    thead+=`<th class="time-th" style="background:${rightBg};color:${rightColor}">${p[0]}<br><span style="font-weight:400;color:#6b7280">${p[1]}</span><br>${p[2]}</th>`;
   }
-  th2+=`</tr>`;
+  thead+=`</tr>`;
 
   // ---- DATA ROWS ----
   let rows='';
   for(let d=0;d<5;d++){
     let row=`<tr><td class="day-th">${DAYS[d]}</td>`;
-    for(let c=0;c<12;c++){
-      // Insert lunch column between col 5 and col 6
-      if(c===6) row+=`<td style="background:#c8cdd8;width:22px;text-align:center;vertical-align:middle;border:1px solid #b0b5c0"></td>`;
-      const ts=TH_GRID[d][c];
-      const ls=LB_GRID[d][c];
-      const sel=selForSlot(ts)||selForSlot(ls);
-      const bg  = sel ? sel.color+'22' : (c<6 ? '#f9fbf9' : '#f9fbff');
-      const bd  = sel ? `border:1.5px solid ${sel.color}` : '';
-      const rc  = sel ? `onclick="removeSelected(${sel.courseId})" title="Click to remove ${sel.courseCode}"` : '';
+
+    // Left 6 cols
+    for(let c=0;c<6;c++){
+      const thSlot = isMorning ? TH_GRID[d][c]   : '';
+      const lbSlot = isMorning ? LB_GRID[d][c]   : LB_GRID[d][c];
+      // Morning left: theory morning slots + morning lab slots (same col index)
+      // Afternoon left: only lab morning slots (LB_GRID 0-5)
+      const slotA = isMorning ? TH_GRID[d][c] : LB_GRID[d][c];
+      const slotB = isMorning ? LB_GRID[d][c] : '';
+      const sel   = selForSlot(slotA)||selForSlot(slotB);
+      const bg    = sel ? sel.color+'22' : '#f9fbf9';
+      const bd    = sel ? `border:1.5px solid ${sel.color}` : '';
+      const rc    = sel ? `onclick="removeSelected(${sel.courseId})" title="Click to remove ${sel.courseCode}"` : '';
+      const label = slotA && slotB ? `${slotA} / ${slotB}` : (slotA||slotB||'');
       row+=`<td class="slot-cell" style="background:${bg};${bd}" ${rc}>`;
-      // Show theory/lab slot codes
-      const slotLabel = ts && ls ? `${ts} / ${ls}` : (ts||ls||'');
-      row+=`<span class="s-code">${slotLabel}</span>`;
-      if(sel){
-        row+=`<span class="s-name" style="color:${sel.color}">${sel.courseCode}</span>`;
-        row+=`<span class="s-venue">${sel.venue}</span>`;
-      }
+      row+=`<span class="s-code">${label}</span>`;
+      if(sel){ row+=`<span class="s-name" style="color:${sel.color}">${sel.courseCode}</span><span class="s-venue">${sel.venue}</span>`; }
       row+=`</td>`;
     }
+
+    // Break col
+    row+=`<td style="background:#c8cdd8;width:22px;border:1px solid #b0b5c0"></td>`;
+
+    // Right 6 cols
+    for(let c=0;c<6;c++){
+      // Morning right: lab afternoon slots (LB_GRID 6-11) + theory afternoon slots (TH_GRID 6-11)
+      // Afternoon right: theory afternoon slots (TH_GRID 6-11) + lab afternoon (LB_GRID 6-11)
+      const slotA = isMorning ? LB_GRID[d][c+6] : TH_GRID[d][c+6];
+      const slotB = isMorning ? TH_GRID[d][c+6] : LB_GRID[d][c+6];
+      const sel   = selForSlot(slotA)||selForSlot(slotB);
+      const bg    = sel ? sel.color+'22' : '#f9fbff';
+      const bd    = sel ? `border:1.5px solid ${sel.color}` : '';
+      const rc    = sel ? `onclick="removeSelected(${sel.courseId})" title="Click to remove ${sel.courseCode}"` : '';
+      const label = slotA && slotB ? `${slotA} / ${slotB}` : (slotA||slotB||'');
+      row+=`<td class="slot-cell" style="background:${bg};${bd}" ${rc}>`;
+      row+=`<span class="s-code">${label}</span>`;
+      if(sel){ row+=`<span class="s-name" style="color:${sel.color}">${sel.courseCode}</span><span class="s-venue">${sel.venue}</span>`; }
+      row+=`</td>`;
+    }
+
     row+=`</tr>`;
     rows+=row;
   }
 
-  tbl.innerHTML=`<thead>${th1}${th2}</thead><tbody>${rows}</tbody>`;
+  tbl.innerHTML=`<thead>${thead}</thead><tbody>${rows}</tbody>`;
 }
 
 // ====== REPORT ======
@@ -813,9 +853,7 @@ function renderReport() {
 // ====== CREDITS ======
 function updateCredits() {
   const total=selected.reduce((a,s)=>a+s.credits,0);
-  const el=document.getElementById('credit-display');
-  el.textContent=`Credits: ${total} / 27`;
-  el.className='credit-badge'+(total>27?' over':total>=20?' warn':'');
+  // badge removed from nav — just keep the value for report use
 }
 
 // ====== ALERTS ======
